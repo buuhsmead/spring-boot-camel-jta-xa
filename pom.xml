@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.buuhsmead.fuse</groupId>
+    <artifactId>spring-boot-camel-jta-xa</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Fabric8 :: Quickstarts :: Spring-Boot :: Camel XML</name>
+    <description>Spring Boot example running a Camel route defined in XML</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- configure the Fuse version you want to use here  -->
+        <!-- <fuse.bom.version>7.4.0.fuse-740036-redhat-00002</fuse.bom.version> -->
+        <!-- <fuse.bom.version>7.5.0.fuse-750029-redhat-00002</fuse.bom.version> -->
+
+        <!-- This is a SB2 app -->
+        <!--         <fuse.bom.version>7.4.0.fuse-sb2-740019-redhat-00005</fuse.bom.version>-->
+        <fuse.bom.version>7.5.0.fuse-sb2-750029-redhat-00003</fuse.bom.version>
+
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.redhat-fuse</groupId>
+                <artifactId>fuse-springboot-bom</artifactId>
+                <version>${fuse.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- JTA XA 2PC and Recovery for JMS and JDBC -->
+        <dependency>
+            <groupId>me.snowdrop</groupId>
+            <artifactId>narayana-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>me.snowdrop</groupId>
+            <artifactId>narayana-spring-boot-recovery-controller</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.messaginghub</groupId>
+            <artifactId>pooled-jms</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-servlet-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-sql-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-jms-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.apache.derby/derby -->
+        <!--        <dependency>-->
+        <!--            <groupId>org.apache.derby</groupId>-->
+        <!--            <artifactId>derbyclient</artifactId>-->
+        <!--            <version>10.14.2.0</version>-->
+        <!--        </dependency>-->
+
+    </dependencies>
+
+    <build>
+        <defaultGoal>spring-boot:run</defaultGoal>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <!-- https://maven.repository.redhat.com/ga/org/apache/maven/plugins/maven-compiler-plugin -->
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jboss.redhat-fuse</groupId>
+                <!--                https://maven.repository.redhat.com/ga/org/jboss/redhat-fuse/spring-boot-maven-plugin/-->
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${fuse.bom.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+    <profiles>
+        <profile>
+            <id>openshift</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jboss.redhat-fuse</groupId>
+                        <!-- https://maven.repository.redhat.com/ga/org/jboss/redhat-fuse/fabric8-maven-plugin/  -->
+                        <artifactId>fabric8-maven-plugin</artifactId>
+                        <version>${fuse.bom.version}</version>
+                        <configuration>
+                            <enricher>
+                                <excludes>
+                                    <exclude>fmp-openshift-route</exclude>
+                                </excludes>
+                            </enricher>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>resource</goal>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

@@ -1,0 +1,25 @@
+== Camel with Spring Boot 2 JTA XA 2PC
+
+This example demonstrates how to run a Camel Service on Spring-Boot 2 that supports XA transactions on two external transactional resources: a JMS resource (A-MQ) and a database (PostgreSQL).
+It also shows how to use transaction propagations.
+
+== Usage on OpenShift
+
+For usage on OCP please look at the quickstart https://github.com/bibryam/spring-boot-camel-xa.
+
+== Database PostgreSQL
+
+Reference: https://hub.docker.com/_/postgres/
+
+[source,bash]
+----
+$ docker volume create pgdata
+
+$ docker run --name postgres -e POSTGRES_PASSWORD=secret -d -p 54320:5432 -v pgdata:/var/lib/postgresql/data postgres:9.6 -c 'max_connections=200' -c 'max_prepared_transactions=100'
+
+$ docker exec -i postgres psql -U postgres -c "CREATE DATABASE sampledb WITH ENCODING='UTF8' OWNER=postgres;"
+----
+
+== Database Derby
+
+Sadly I could not get it working with the Apache Derby database network connection.
