@@ -3,11 +3,11 @@
 This example demonstrates how to run a Camel Service on Spring-Boot 2 that supports XA transactions on two external transactional resources: a JMS resource (A-MQ) and a database (PostgreSQL).
 It also shows how to use transaction propagations.
 
-== Usage on OpenShift
+== Run on local workstation
 
-For usage on OCP please look at the quickstart https://github.com/bibryam/spring-boot-camel-xa.
+ mvn -D"spring-boot.run.profiles"=local
 
-== Database PostgreSQL
+=== Database PostgreSQL
 
 Reference: https://hub.docker.com/_/postgres/
 
@@ -20,6 +20,50 @@ $ docker run --name postgres -e POSTGRES_PASSWORD=secret -d -p 54320:5432 -v pgd
 $ docker exec -i postgres psql -U postgres -c "CREATE DATABASE sampledb WITH ENCODING='UTF8' OWNER=postgres;"
 ----
 
-== Database Derby
+=== Database Derby
 
 Sadly I could not get it working with the Apache Derby database network connection.
+
+=== AMQ Broker
+
+Instructions still to write.
+
+== Deploy on OpenShift
+
+Reference: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.5/html/fuse_on_openshift_guide/camel-spring-boot-application-with-xa-transactions
+
+Install the Fuse imagestreams and templates on the OpenShift 4.x server
+
+https://access.redhat.com/documentation/en-us/red_hat_fuse/7.5/html/fuse_on_openshift_guide/get-started-admin#install-fuse-on-openshift4
+
+=== Prepare
+
+Watch the username and password.
+Has to be the same as in application.properties
+
+
+oc new-app --param=POSTGRESQL_USER=theuser --param=POSTGRESQL_PASSWORD='Thepassword1!' --env=POSTGRESQL_MAX_PREPARED_TRANSACTIONS=100 --template=postgresql-persistent
+
+
+oc new-app --param=MQ_USERNAME=theuser --param=MQ_PASSWORD='Thepassword1!' --template=amq63-persistent
+
+oc create -f persistent-volume-claim.yml
+
+mvn fabric8:deploy -P openshift
+
+oc scale statefulset spring-boot-camel-jta-xa --replicas 3
+
+NOTE: for OCP 4 the StateFullSet has apiVersion: apps/v1 and not apiVersion: apps/v1beta1
+
+=== PostgreSQL nested XA
+
+Tried to get nested transaction working, as shown in the camel routes.
+But I could not get it working with PostgreSQL.
+
+reference: https://jdbc.postgresql.org/documentation/faq.html#xa-support
+
+So transaction support is available, but not (yet) nested.
+
+reference: https://www.postgresql.org/docs/10/sql-begin.html
+
+

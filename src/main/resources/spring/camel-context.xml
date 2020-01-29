@@ -106,7 +106,8 @@
 
         <route id="do-nested-tx">
             <from id="start-nested-tx" uri="direct:nestedTX"/>
-            <transacted ref="PROPAGATION_REQUIRES_NEW"/>
+            <!--           <transacted ref="PROPAGATION_REQUIRES_NEW"/>-->
+            <transacted/>
             <setBody>
                 <simple>A nested TX message.</simple>
             </setBody>

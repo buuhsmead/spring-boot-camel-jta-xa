@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+spec:
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  serviceName: @project.artifactId@-headless
+  template:
+    spec:
+      containers:
+        - env:
+            - name: CLUSTER_RECOVERY_ENABLED
+              value: true
+            - name: CLUSTER_BASE_DIR
+              value: /var/transaction/data
+            - name: CLUSTER_NODENAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: SPRING_APPLICATION_JSON
+              value: '{"server":{"undertow":{"io-threads":1, "worker-threads":2 }}}'
+            - name: SPRING_PROFILES_ACTIVE
+              value: openshift
+          volumeMounts:
+            - mountPath: /var/transaction/data
+              name: @project.artifactId@-data
+          resources:
+            requests:
+              cpu: "0.2"
+              memory: 256Mi
+            limits:
+              cpu: "1.0"
+              memory: 256Mi
+      serviceAccountName: @project.artifactId@
+      terminationGracePeriodSeconds: 180
+      volumes:
+        - name: @project.artifactId@-data
+          persistentVolumeClaim:
+            claimName: spring-boot-camel-xa
