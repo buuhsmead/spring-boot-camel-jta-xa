@@ -66,4 +66,25 @@ So transaction support is available, but not (yet) nested.
 
 reference: https://www.postgresql.org/docs/10/sql-begin.html
 
+=== Spring Boot Recovery Controller
 
+We have now transaction enabled in our application.
+And scaling via the StatefulSet configuration is also enable.
+But what if you scale up to 3 pods and need to scale down to one pod because the load of the app is not high enough.
+If there are still pending transactions then the
+https://github.com/snowdrop/narayana-spring-boot/tree/master/openshift/recovery-controller[Recovery Controller] will keep the needed Pod alive until the transactions are finished.
+
+The Recovery Controller guarantees that when the application is scaled down, all instances, that are terminated, complete all their work correctly without leaving pending transactions.
+
+The Spring Boot Narayana recovery controller allows to gracefully handle the scaling down phase of a StatefulSet by cleaning pending transactions before termination.
+If a scaling down operation is executed and the pod is not clean after termination, the previous number of replicas is restored, hence effectively canceling the scaling down operation.
+
+reference: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.5/html-single/fuse_on_openshift_guide/index#spring-boot-narayana-recovery-controller
+
+=== Recovery crash test
+
+Still in need of a good reproducible scenario.
+
+https://github.com/jboss-developer/jboss-eap-quickstarts/tree/7.0.0.Final/jta-crash-rec
+
+- scenario: during scale down of the StatefulSet, pending transactions must be finished, before the Pod is terminated.
